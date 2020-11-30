@@ -4,7 +4,13 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+
 
 /**
  * 该类用于实现RSA算法的操作,包括秘钥生成、加解密，签名验签等操作
@@ -25,6 +31,83 @@ public class RSACode {
         //调用解密方法进行解密
         byte[] originalTxt = code.decrypt(cipherTxt, keyPair.getPrivate());
     }
+
+    //===========================通过读取密钥文件恢复公钥和私钥================//
+
+    /**
+     * 根据pem文件恢复私钥
+     *
+     * @param file_name 文件名称
+     * @return 私钥对象
+     */
+    public PrivateKey readPriByPem(String file_name) {
+        // TODO: 2020/11/30 读取pem文件，恢复私钥
+        return null;
+    }
+
+    /**
+     * 根据pem文件恢复公钥
+     *
+     * @param file_name 文件名称
+     * @return 公钥对象
+     */
+    public PublicKey readPubByPem(String file_name) {
+        // TODO: 2020/11/30 读取pem文件，恢复公钥
+        return null;
+    }
+
+    /**
+     * 根据der公钥文件，恢复公钥
+     *
+     * @param file_name 文件名称
+     * @return 公钥对象
+     */
+    public PublicKey loadPubByDer(String file_name) {
+        try {
+            byte[] pubBytes = Files.readAllBytes(Paths.get(file_name));
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(pubBytes);
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            return factory.generatePublic(spec);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 读取der文件，恢复成私钥
+     *
+     * @param file_name 私钥文件
+     * @return 私钥对象
+     */
+    public PrivateKey loadPriByDer(String file_name) {
+        /**
+         * 字节流：任意的文件，把文件内容读成byte[]
+         * 字符流：只针对文档/文本. readString, readLine
+         */
+        try {
+            //从文件当中读取私钥字节数据
+            byte[] priBytes = Files.readAllBytes(Paths.get(file_name));
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(priBytes);
+            //工厂类:KeyFactory
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            //生成私钥
+            return factory.generatePrivate(spec);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (InvalidKeySpecException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    //===========================MD5哈希计算===========================//
 
     /**
      * 对原文数据进行MD5的hash计算
@@ -150,7 +233,6 @@ public class RSACode {
         }
         return null;
     }
-
 
     /**
      * 使用rsa的公钥对数据进行加密
